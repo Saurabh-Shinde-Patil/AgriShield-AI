@@ -286,4 +286,4 @@ const cropRules = {
   }
 };
 
-module.exports = cropRules;
+export default cropRules;

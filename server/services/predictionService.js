@@ -1,12 +1,12 @@
-const cropRules = require('../data/cropRules');
-const pestDatabase = require('../data/pestDatabase');
-const Prediction = require('../models/Prediction');
+import cropRules from '../data/cropRules.js';
+import pestDatabase from '../data/pestDatabase.js';
+import Prediction from '../models/Prediction.js';
 
 /**
  * Generate pest & disease risk prediction based on environmental conditions
  * Uses rule-based thresholds from FAO/ICAR models
  */
-function generatePrediction(params) {
+export function generatePrediction(params) {
   const {
     temperature,
     humidity,
@@ -180,7 +180,7 @@ function getDefaultPrediction(temp, humidity, rainfall, soilMoisture, windSpeed,
 /**
  * Save prediction to database
  */
-async function savePrediction(predictionData, lat, lng, locationName) {
+export async function savePrediction(predictionData, lat, lng, locationName) {
   const prediction = new Prediction({
     ...predictionData,
     lat,
@@ -190,5 +190,3 @@ async function savePrediction(predictionData, lat, lng, locationName) {
   });
   return await prediction.save();
 }
-
-module.exports = { generatePrediction, savePrediction };

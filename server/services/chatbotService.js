@@ -1,5 +1,5 @@
-const cropRules = require('../data/cropRules');
-const pestDatabase = require('../data/pestDatabase');
+import cropRules from '../data/cropRules.js';
+import pestDatabase from '../data/pestDatabase.js';
 
 /**
  * Chatbot service for agricultural queries
@@ -70,7 +70,7 @@ function getCropSpecificResponse(message) {
   return null;
 }
 
-function processQuery(message) {
+export function processQuery(message) {
   const msgLower = message.toLowerCase();
 
   // Check crop-specific first
@@ -90,5 +90,3 @@ function processQuery(message) {
     type: 'default'
   };
 }
-
-module.exports = { processQuery };

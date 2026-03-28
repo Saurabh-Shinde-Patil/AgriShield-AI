@@ -88,4 +88,4 @@ const pestDatabase = {
   ]
 };
 
-module.exports = pestDatabase;
+export default pestDatabase;

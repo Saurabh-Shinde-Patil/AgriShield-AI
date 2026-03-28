@@ -1,11 +1,11 @@
-const cropRules = require('../data/cropRules');
-const pestDatabase = require('../data/pestDatabase');
-const Advisory = require('../models/Advisory');
+import cropRules from '../data/cropRules.js';
+import pestDatabase from '../data/pestDatabase.js';
+import Advisory from '../models/Advisory.js';
 
 /**
  * Generate smart advisory based on prediction results
  */
-function generateAdvisory(prediction) {
+export function generateAdvisory(prediction) {
   const { cropType, pestRisk, diseaseRisk, pestScore, diseaseScore, primaryPests, primaryDiseases, weatherSnapshot } = prediction;
   
   const overallRisk = pestScore > diseaseScore ? pestRisk : diseaseRisk;
@@ -305,12 +305,10 @@ function generateVoiceText(cropType, riskLevel, topRecs, weatherAdvisory) {
 /**
  * Save advisory to database
  */
-async function saveAdvisory(advisoryData, predictionId) {
+export async function saveAdvisory(advisoryData, predictionId) {
   const advisory = new Advisory({
     ...advisoryData,
     predictionId
   });
   return await advisory.save();
 }
-
-module.exports = { generateAdvisory, saveAdvisory };

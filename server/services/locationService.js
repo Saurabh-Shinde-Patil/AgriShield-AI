@@ -1,11 +1,11 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 const API_KEY = process.env.OPENWEATHER_API_KEY;
 
 /**
  * Reverse geocode coordinates to location name
  */
-async function reverseGeocode(lat, lng) {
+export async function reverseGeocode(lat, lng) {
   try {
     const res = await fetch(
       `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lng}&limit=1&appid=${API_KEY}`
@@ -63,7 +63,7 @@ function getDemoLocation(lat, lng) {
 /**
  * Search locations by name
  */
-async function searchLocation(query) {
+export async function searchLocation(query) {
   try {
     const res = await fetch(
       `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)},IN&limit=5&appid=${API_KEY}`
@@ -86,5 +86,3 @@ async function searchLocation(query) {
     return [];
   }
 }
-
-module.exports = { reverseGeocode, searchLocation };

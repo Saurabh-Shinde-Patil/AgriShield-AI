@@ -80,7 +80,7 @@ const diseaseDatabase = [
  * Analyze uploaded crop image for disease detection
  * Returns simulated results based on crop type
  */
-function analyzeImage(cropType, imageName) {
+export function analyzeImage(cropType, imageName) {
   // Filter diseases relevant to the crop
   const cropLower = (cropType || '').toLowerCase();
   let relevantDiseases = diseaseDatabase.filter(d =>
@@ -116,5 +116,3 @@ function analyzeImage(cropType, imageName) {
 
   return results;
 }
-
-module.exports = { analyzeImage };

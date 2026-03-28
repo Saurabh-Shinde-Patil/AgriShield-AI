@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const weatherLogSchema = new mongoose.Schema({
   lat: { type: Number, required: true },
@@ -32,4 +32,4 @@ const weatherLogSchema = new mongoose.Schema({
 weatherLogSchema.index({ lat: 1, lng: 1, fetchedAt: -1 });
 weatherLogSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.model('WeatherLog', weatherLogSchema);
+export default mongoose.model('WeatherLog', weatherLogSchema);

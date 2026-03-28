@@ -1,5 +1,5 @@
-const fetch = require('node-fetch');
-const WeatherLog = require('../models/WeatherLog');
+import fetch from 'node-fetch';
+import WeatherLog from '../models/WeatherLog.js';
 
 const API_KEY = process.env.OPENWEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
@@ -8,7 +8,7 @@ const BASE_URL = 'https://api.openweathermap.org/data/2.5';
  * Fetch current weather + 5-day forecast from OpenWeatherMap
  * Results are cached in MongoDB for 30 minutes
  */
-async function getWeatherData(lat, lng) {
+export async function getWeatherData(lat, lng) {
   // Check cache first
   const cached = await WeatherLog.findOne({
     lat: { $gte: lat - 0.01, $lte: lat + 0.01 },
@@ -108,7 +108,7 @@ function getMostFrequent(arr) {
   return Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-function generateDemoWeather(lat, lng) {
+export function generateDemoWeather(lat, lng) {
   const baseTemp = 28 + (Math.random() * 8 - 4);
   const baseHumidity = 65 + (Math.random() * 20 - 10);
   
@@ -146,5 +146,3 @@ function generateDemoWeather(lat, lng) {
     fetchedAt: new Date()
   };
 }
-
-module.exports = { getWeatherData, generateDemoWeather };

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const environmentalDataSchema = new mongoose.Schema({
   lat: Number,
@@ -16,4 +16,4 @@ const environmentalDataSchema = new mongoose.Schema({
 
 environmentalDataSchema.index({ cropType: 1, createdAt: -1 });
 
-module.exports = mongoose.model('EnvironmentalData', environmentalDataSchema);
+export default mongoose.model('EnvironmentalData', environmentalDataSchema);

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const predictionSchema = new mongoose.Schema({
   lat: Number,
@@ -31,4 +31,4 @@ const predictionSchema = new mongoose.Schema({
 predictionSchema.index({ cropType: 1, createdAt: -1 });
 predictionSchema.index({ pestRisk: 1, diseaseRisk: 1 });
 
-module.exports = mongoose.model('Prediction', predictionSchema);
+export default mongoose.model('Prediction', predictionSchema);

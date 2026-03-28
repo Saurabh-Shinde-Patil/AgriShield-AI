@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const advisorySchema = new mongoose.Schema({
   predictionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Prediction' },
@@ -32,4 +32,4 @@ const advisorySchema = new mongoose.Schema({
 
 advisorySchema.index({ cropType: 1, riskLevel: 1 });
 
-module.exports = mongoose.model('Advisory', advisorySchema);
+export default mongoose.model('Advisory', advisorySchema);
