@@ -1,14 +1,31 @@
+/**
+ * Environmental Data Controller
+ * Handles submission and retrieval of field sensor/observation data.
+ *
+ * FUTURE: This is the primary endpoint for hardware IoT sensors.
+ * Sensors will POST temperature, humidity, and soil moisture data here.
+ * Supported sources: 'manual' | 'sensor' | 'api'
+ */
 import EnvironmentalData from '../models/EnvironmentalData.js';
 
-// @desc    Submit environmental/sensor data
-// @route   POST /api/environmental
-// @access  Public
+/**
+ * @desc    Submit environmental / sensor data
+ * @route   POST /api/environmental
+ * @access  Public
+ */
 export const submitEnvironmentalData = async (req, res) => {
   try {
-    const { temperature, humidity, soilMoisture, rainfall, cropType, lat, lng, locationName, source, deviceId, notes } = req.body;
+    const {
+      temperature, humidity, soilMoisture, rainfall,
+      cropType, lat, lng, locationName, source, deviceId, notes,
+    } = req.body;
 
+    // Validate required fields
     if (!temperature || !humidity || !soilMoisture || !cropType) {
-      return res.status(400).json({ success: false, error: 'Temperature, humidity, soil moisture, and crop type are required' });
+      return res.status(400).json({
+        success: false,
+        error: 'Temperature, humidity, soil moisture, and crop type are required',
+      });
     }
 
     const data = new EnvironmentalData({
@@ -20,9 +37,9 @@ export const submitEnvironmentalData = async (req, res) => {
       lat: parseFloat(lat) || 0,
       lng: parseFloat(lng) || 0,
       locationName: locationName || 'Unknown',
-      source: source || 'manual',
-      deviceId,
-      notes
+      source: source || 'manual',   // 'sensor' when coming from hardware
+      deviceId,                      // Hardware device identifier
+      notes,
     });
 
     await data.save();
@@ -33,12 +50,15 @@ export const submitEnvironmentalData = async (req, res) => {
   }
 };
 
-// @desc    Get environmental data history
-// @route   GET /api/environmental/history
-// @access  Public
+/**
+ * @desc    Get environmental data history
+ * @route   GET /api/environmental/history
+ * @access  Public
+ */
 export const getEnvironmentalHistory = async (req, res) => {
   try {
     const { limit = 20, cropType, source } = req.query;
+
     const filter = {};
     if (cropType) filter.cropType = new RegExp(cropType, 'i');
     if (source) filter.source = source;
@@ -49,6 +69,7 @@ export const getEnvironmentalHistory = async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
+    console.error('Environmental history error:', error.message);
     res.status(500).json({ success: false, error: 'Failed to fetch environmental data' });
   }
 };

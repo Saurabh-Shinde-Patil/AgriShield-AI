@@ -1,24 +1,42 @@
-import { generatePrediction as genPred, savePrediction as savePred } from '../services/predictionService.js';
+/**
+ * Prediction Controller
+ * Handles pest & disease prediction requests.
+ * Accepts both manual sensor input and weather API data.
+ *
+ * FUTURE: Hardware sensor data will flow through the same
+ * prediction pipeline via the /api/environmental → /api/predict chain.
+ */
+import { generatePrediction, savePrediction } from '../services/predictionService.js';
 import { getWeatherData } from '../services/weatherService.js';
 import Prediction from '../models/Prediction.js';
 
-// @desc    Generate prediction
-// @route   POST /api/predict
-// @access  Public
+/**
+ * @desc    Generate pest & disease prediction
+ * @route   POST /api/predict
+ * @access  Public
+ */
 export const generatePredictionRoute = async (req, res) => {
   try {
-    const { temperature, humidity, soilMoisture, rainfall, windSpeed, cropType, lat, lng, locationName, locationState } = req.body;
+    const {
+      temperature, humidity, soilMoisture, rainfall, windSpeed,
+      cropType, lat, lng, locationName, locationState,
+    } = req.body;
 
+    if (!cropType) {
+      return res.status(400).json({ success: false, error: 'Crop type is required' });
+    }
+
+    // Start with user-provided values (may come from hardware sensors)
     let temp = temperature;
     let hum = humidity;
     let rain = rainfall || 0;
     let wind = windSpeed || 5;
     let soil = soilMoisture || 50;
 
-    // If lat/lng provided but no manual data, use weather API
+    // Fall back to weather API if manual data is incomplete
     if (lat && lng && (!temperature || !humidity)) {
       const weather = await getWeatherData(parseFloat(lat), parseFloat(lng));
-      if (weather && weather.current) {
+      if (weather?.current) {
         temp = temp || weather.current.temp;
         hum = hum || weather.current.humidity;
         rain = rain || weather.current.rainfall || 0;
@@ -26,22 +44,23 @@ export const generatePredictionRoute = async (req, res) => {
       }
     }
 
-    if (!cropType) {
-      return res.status(400).json({ success: false, error: 'Crop type is required' });
-    }
-
-    const predictionData = genPred({
+    const predictionData = generatePrediction({
       temperature: parseFloat(temp) || 28,
       humidity: parseFloat(hum) || 65,
       soilMoisture: parseFloat(soil),
       rainfall: parseFloat(rain),
       windSpeed: parseFloat(wind),
       cropType,
-      locationState: locationState || ''
+      locationState: locationState || '',
     });
 
-    // Save to database
-    const saved = await savePred(predictionData, parseFloat(lat) || 0, parseFloat(lng) || 0, locationName || 'Unknown');
+    // Persist to database
+    const saved = await savePrediction(
+      predictionData,
+      parseFloat(lat) || 0,
+      parseFloat(lng) || 0,
+      locationName || 'Unknown',
+    );
 
     res.json({ success: true, data: { ...predictionData, _id: saved._id } });
   } catch (error) {
@@ -50,12 +69,15 @@ export const generatePredictionRoute = async (req, res) => {
   }
 };
 
-// @desc    Get prediction history
-// @route   GET /api/predict/history
-// @access  Public
+/**
+ * @desc    Get prediction history
+ * @route   GET /api/predict/history
+ * @access  Public
+ */
 export const getPredictionHistory = async (req, res) => {
   try {
     const { limit = 20, cropType, riskLevel } = req.query;
+
     const filter = {};
     if (cropType) filter.cropType = new RegExp(cropType, 'i');
     if (riskLevel) filter.$or = [{ pestRisk: riskLevel }, { diseaseRisk: riskLevel }];
@@ -71,9 +93,11 @@ export const getPredictionHistory = async (req, res) => {
   }
 };
 
-// @desc    Get single prediction
-// @route   GET /api/predict/:id
-// @access  Public
+/**
+ * @desc    Get a single prediction by ID
+ * @route   GET /api/predict/:id
+ * @access  Public
+ */
 export const getPredictionById = async (req, res) => {
   try {
     const prediction = await Prediction.findById(req.params.id);
@@ -82,6 +106,7 @@ export const getPredictionById = async (req, res) => {
     }
     res.json({ success: true, data: prediction });
   } catch (error) {
+    console.error('Prediction fetch error:', error.message);
     res.status(500).json({ success: false, error: 'Failed to fetch prediction' });
   }
 };

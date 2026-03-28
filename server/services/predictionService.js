@@ -1,6 +1,7 @@
 import cropRules from '../data/cropRules.js';
 import pestDatabase from '../data/pestDatabase.js';
 import Prediction from '../models/Prediction.js';
+import { RISK_THRESHOLDS, PREDICTION_VALIDITY_MS } from '../config/constants.js';
 
 /**
  * Generate pest & disease risk prediction based on environmental conditions
@@ -70,6 +71,10 @@ export function generatePrediction(params) {
   };
 }
 
+/**
+ * Evaluate how well current conditions match pest/disease trigger rules.
+ * Returns a normalized score (0–100) and the top matching threats.
+ */
 function evaluateRisks(rules, conditions) {
   let totalScore = 0;
   const triggered = [];
@@ -93,6 +98,11 @@ function evaluateRisks(rules, conditions) {
   return { score: normalizedScore, triggered: triggered.slice(0, 3) };
 }
 
+/**
+ * Calculate how closely actual environmental conditions match
+ * the trigger thresholds for a specific pest or disease.
+ * Returns a value between 0 (no match) and 1 (perfect match).
+ */
 function calculateMatchScore(conditions, actual) {
   let matches = 0;
   let total = 0;
@@ -138,9 +148,10 @@ function calculateMatchScore(conditions, actual) {
   return total > 0 ? matches / total : 0;
 }
 
+/** Convert a numeric risk score to a human-readable level. */
 function scoreToLevel(score) {
-  if (score >= 60) return 'High';
-  if (score >= 35) return 'Medium';
+  if (score >= RISK_THRESHOLDS.HIGH) return 'High';
+  if (score >= RISK_THRESHOLDS.MEDIUM) return 'Medium';
   return 'Low';
 }
 
@@ -186,7 +197,7 @@ export async function savePrediction(predictionData, lat, lng, locationName) {
     lat,
     lng,
     locationName,
-    validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000)
+    validUntil: new Date(Date.now() + PREDICTION_VALIDITY_MS)
   });
   return await prediction.save();
 }

@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import WeatherLog from '../models/WeatherLog.js';
+import { WEATHER_CACHE_DURATION_MS, WEATHER_CACHE_RADIUS } from '../config/constants.js';
 
 const API_KEY = process.env.OPENWEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
@@ -11,8 +12,8 @@ const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 export async function getWeatherData(lat, lng) {
   // Check cache first
   const cached = await WeatherLog.findOne({
-    lat: { $gte: lat - 0.01, $lte: lat + 0.01 },
-    lng: { $gte: lng - 0.01, $lte: lng + 0.01 },
+    lat: { $gte: lat - WEATHER_CACHE_RADIUS, $lte: lat + WEATHER_CACHE_RADIUS },
+    lng: { $gte: lng - WEATHER_CACHE_RADIUS, $lte: lng + WEATHER_CACHE_RADIUS },
     expiresAt: { $gt: new Date() }
   }).sort({ fetchedAt: -1 });
 
@@ -54,7 +55,7 @@ export async function getWeatherData(lat, lng) {
     },
     forecast: dailyForecast,
     fetchedAt: new Date(),
-    expiresAt: new Date(Date.now() + 30 * 60 * 1000)
+    expiresAt: new Date(Date.now() + WEATHER_CACHE_DURATION_MS)
   });
 
   try {
@@ -66,6 +67,7 @@ export async function getWeatherData(lat, lng) {
   return weatherLog;
 }
 
+/** Aggregate 3-hourly forecast data into daily summaries. */
 function processForecast(forecastList) {
   const dailyMap = {};
 
@@ -102,12 +104,14 @@ function processForecast(forecastList) {
   })).slice(0, 7);
 }
 
+/** Find the most frequently occurring value in an array. */
 function getMostFrequent(arr) {
   const freq = {};
   arr.forEach(item => { freq[item] = (freq[item] || 0) + 1; });
   return Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
 }
 
+/** Generate realistic demo weather data when API key is unavailable. */
 export function generateDemoWeather(lat, lng) {
   const baseTemp = 28 + (Math.random() * 8 - 4);
   const baseHumidity = 65 + (Math.random() * 20 - 10);
