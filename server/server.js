@@ -15,17 +15,17 @@ app.use('/uploads', express.static('uploads'));
 connectDB();
 
 // API Routes
-app.use('/api/weather', require('./routes/weather'));
-app.use('/api/predict', require('./routes/prediction'));
-app.use('/api/advisory', require('./routes/advisory'));
-app.use('/api/environmental', require('./routes/environmental'));
-app.use('/api/location', require('./routes/location'));
-app.use('/api/analyze-image', require('./routes/imageAnalysis'));
-app.use('/api/chatbot', require('./routes/chatbot'));
-app.use('/api/alerts', require('./routes/alerts'));
+app.use('/weather', require('./routes/weather'));
+app.use('/predict', require('./routes/prediction'));
+app.use('/advisory', require('./routes/advisory'));
+app.use('/environmental', require('./routes/environmental'));
+app.use('/location', require('./routes/location'));
+app.use('/analyze-image', require('./routes/imageAnalysis'));
+app.use('/chatbot', require('./routes/chatbot'));
+app.use('/alerts', require('./routes/alerts'));
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'AgriShield AI API', timestamp: new Date() });
 });
 
