@@ -1,24 +1,40 @@
+/**
+ * File upload middleware (Multer)
+ * Handles multipart/form-data for crop image uploads.
+ * Validates file type and enforces size limits.
+ */
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { UPLOAD } from '../config/constants.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configure multer storage
+// ── Storage Config ───────────────────────────────────────────────
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Navigate from middleware/ folder to uploads/ folder
+  destination: (_req, _file, cb) => {
     cb(null, path.join(__dirname, '..', 'uploads'));
   },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
+  filename: (_req, file, cb) => {
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
+  },
 });
 
-const upload = multer({ 
-  storage, 
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+// ── File Filter — Only allow images ──────────────────────────────
+const fileFilter = (_req, file, cb) => {
+  if (UPLOAD.ALLOWED_MIMETYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`Invalid file type. Allowed: ${UPLOAD.ALLOWED_MIMETYPES.join(', ')}`), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: UPLOAD.MAX_FILE_SIZE },
 });
 
 export default upload;

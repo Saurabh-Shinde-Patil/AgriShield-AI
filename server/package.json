@@ -5,8 +5,8 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "cross-env NODE_OPTIONS=--dns-result-order=ipv4first node server.js",
-    "dev": "cross-env NODE_OPTIONS=--dns-result-order=ipv4first nodemon server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

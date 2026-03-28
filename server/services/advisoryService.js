@@ -3,7 +3,8 @@ import pestDatabase from '../data/pestDatabase.js';
 import Advisory from '../models/Advisory.js';
 
 /**
- * Generate smart advisory based on prediction results
+ * Generate smart advisory based on prediction results.
+ * Produces recommendations, spray schedule, profit impact, and voice text.
  */
 export function generateAdvisory(prediction) {
   const { cropType, pestRisk, diseaseRisk, pestScore, diseaseScore, primaryPests, primaryDiseases, weatherSnapshot } = prediction;
@@ -34,7 +35,7 @@ export function generateAdvisory(prediction) {
   const spraySchedule = getSpraySchedule(overallRisk, cropType, weatherSnapshot, primaryPests, primaryDiseases);
 
   // Profit impact estimation
-  const profitImpact = estimateProfitImpact(overallRisk, pestScore, diseaseScore);
+  const profitImpact = estimateProfitImpact(overallRisk);
 
   // Generate voice text
   const voiceText = generateVoiceText(cropType, overallRisk, recommendations.slice(0, 3), weatherAdvisory);
@@ -262,8 +263,7 @@ function getSpraySchedule(riskLevel, cropType, weather, pests, diseases) {
   };
 }
 
-function estimateProfitImpact(riskLevel, pestScore, diseaseScore) {
-  const avgRisk = (pestScore + diseaseScore) / 2;
+function estimateProfitImpact(riskLevel) {
 
   if (riskLevel === 'High') {
     return {
@@ -303,7 +303,7 @@ function generateVoiceText(cropType, riskLevel, topRecs, weatherAdvisory) {
 }
 
 /**
- * Save advisory to database
+ * Save advisory to database.
  */
 export async function saveAdvisory(advisoryData, predictionId) {
   const advisory = new Advisory({
